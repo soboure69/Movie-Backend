@@ -14,7 +14,7 @@ Bienvenue dans l’API **MovieLens** – une API RESTful développée avec **Fas
 
 ## Prérequis
 
-- Python ≥ 3.12
+- Python ≥ 3.13
 - Un client HTTP comme `httpx` ou `requests`
 
 Installation rapide de `httpx` :
@@ -129,13 +129,13 @@ Les contributions sont les bienvenues !
 
 ## Software Development Kit (SDK)
 
-*A venir*
+[https://pypi.org/project/films_sdk_sbre/0.0.2/](https://pypi.org/project/films_sdk_sbre/0.0.2/)
 
 ---
 
 ## URL publique (Cloud) de l'API
 
-*A venir*
+[https://movie-backend-x8iq.onrender.com](https://movie-backend-x8iq.onrender.com)
 
 ## Auteur
 
