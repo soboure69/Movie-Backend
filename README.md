@@ -1,140 +1,86 @@
-# Movie-Backend
-Phase 1 du Projet CinéData
+# CinéData — Phase 1 : API et SDK MovieLens
 
-# Mission : **Construire un Écosystème Data Centré sur le Cinéma avec Python, FastAPI et Streamlit** 
+Projet personnel en deux dépôts, autour du jeu de données MovieLens :
 
-**Contexte : Plongez dans l’univers du cinéma et de la Data Science**  
+| Phase | Dépôt | Contenu |
+|---|---|---|
+| **1. API et SDK** | **ce dépôt** | Base SQLite, API REST FastAPI, SDK Python publié sur PyPI |
+| 2. Analyse et application | [Movies-Analytics](https://github.com/soboure69/Movies-Analytics) | Notebooks d'analyse et application Streamlit qui interroge cette API via le SDK |
 
-Une entreprise fictive, **CineData Insights** souhaite révolutionner l'expérience cinéphile grâce à une plateforme intelligente exploitant les données de films. Leur ambition : **Créer un système ultra-performant d'analyse de leurs données** à destination des plateformes de streaming, des cinéphiles et des studios de production.  
+**En ligne**
 
-Mais il y a un problème... **Leurs données sont dans un état chaotique !** 
-Elles sont éparpillées dans quelques fichiers CSV, rendant toute exploitation fastidieuse. Aucun système centralisé ne permet de requêter efficacement les informations sur les films, les notes attribuées par les utilisateurs ou encore les tags associés.  
+- API : <https://movie-backend-x8iq.onrender.com> · documentation interactive : [`/docs`](https://movie-backend-x8iq.onrender.com/docs)
+- SDK : [`films-sdk-sbre` sur PyPI](https://pypi.org/project/films-sdk-sbre/)
+- Application qui utilise l'API : <https://movies-analytics-by-soboure-bello.streamlit.app/>
 
-C'est là que j'interviens en tant que **Consultant Data polyvalent / Ingénieur Data** ! Ma mission: Transformer ce chaos en un écosystème data performant et interactif. Je suis **le chef d’orchestre** de ce projet, portant successivement trois casquettes :  
+L'API est hébergée sur l'offre gratuite de Render : après une période sans visite, le premier appel la réveille en 30 à 60 secondes.
 
----
+![Architecture de la phase 1](architecture.png)
 
-## **Phase 1 : Développeur Python & Architecte API**  
+## Ce que j'ai construit
 
-![](architecture.png)
+1. **Données.** Les quatre fichiers MovieLens `ml-latest-small` (GroupLens) : 9 742 films, 100 836 notes et 3 683 tags donnés par 610 utilisateurs, et 9 742 liens vers IMDb et TMDb. Ils sont chargés dans une base SQLite (`api/movies.db`) décrite par quatre modèles SQLAlchemy : `movies`, `ratings`, `tags`, `links`.
+2. **API REST (FastAPI).** Onze points d'accès en lecture, documentés dans Swagger :
 
-**Objectif : Construire une API robuste pour centraliser et exposer les données MovieLens.**  
+   | Point d'accès | Rôle |
+   |---|---|
+   | `GET /` | État de l'API |
+   | `GET /movies`, `GET /movies/{movie_id}` | Films, avec pagination (`skip`, `limit` ≤ 1 000) et filtres par titre ou genre ; un film avec ses notes et ses tags |
+   | `GET /ratings`, `GET /ratings/{user_id}/{movie_id}` | Notes |
+   | `GET /tags`, `GET /tags/{user_id}/{movie_id}/{tag_text}` | Tags |
+   | `GET /links`, `GET /links/{movie_id}` | Identifiants IMDb et TMDb |
+   | `GET /analytics` | Nombre de films, de notes, de tags et de liens |
 
-🔹 **Design de la base de données** :  
-- Modéliser la base de données en SQL à partir des fichiers CSV.  
-- Utiliser **SQLite** pour stocker les données de manière efficace.  
-- Gérer les relations entre les films, les utilisateurs, les notes et les tags.  
+   Les réponses sont validées par des schémas Pydantic. Les requêtes sont regroupées dans `api/query_helpers.py`.
+3. **SDK Python (`films_sdk_sbre`).** Un client `MovieClient` qui couvre tous les points d'accès et renvoie, au choix, des objets Pydantic, des dictionnaires ou un `DataFrame` pandas. Publié sur PyPI par GitHub Actions (`.github/workflows/python-publish.yml`), avec la publication de confiance de PyPI : aucun jeton n'est stocké dans le dépôt.
+4. **Déploiement.** Image Docker (`python:3.13-slim`, `api/Dockerfile`) déployée sur Render.
 
-🔹 **Développement de l’API avec FastAPI** :  
-- Concevoir un **API RESTful** permettant d'interroger facilement les films et les notes des utilisateurs.  
-- Intégrer **Pydantic** pour la validation des données entrantes.  
-- Utiliser **SQLAlchemy** pour la gestion des requêtes à la base de données.  
+## Utiliser l'API
 
-🔹 **Déploiement de l’API** :  
-- Héberger l’API sur un cloud public (**Render, AWS, Azure, GCP**).  
-- Prévoir une version **on-premise** avec Docker.  
-- Sécuriser les endpoints et optimiser les performances.  
+Avec le SDK (Python 3.13 ou plus récent) :
 
-🔹 **Création d’un SDK en Python** :  
-- Développer un **package Python** permettant aux utilisateurs d'interagir facilement avec l’API.  
-- Publier ce package sur **PyPI**, afin qu’il puisse être utilisé dans d'autres projets.  
+```bash
+pip install films_sdk_sbre
+```
 
-**Livrables** :  
-- Une base de données centralisée et prête à l’emploi.  
-- Une API FastAPI documentée et déployée.  
-- Un SDK Python simple d'utilisation et bien documenté
+```python
+from films_sdk_sbre import MovieClient, MovieConfig
 
----
+client = MovieClient(MovieConfig(movie_base_url="https://movie-backend-x8iq.onrender.com"))
+client.get_movie(1)                                  # Toy Story (1995), avec ses notes et ses tags
+films = client.list_movies(genre="Comedy", limit=50, output_format="pandas")
+```
 
-## **Phase 2 : Data Analyst - Exploration et Visualisation**  
+Ou directement : `curl https://movie-backend-x8iq.onrender.com/movies/1`.
 
-![](architecturephase.png)
+## Lancer l'API en local
 
-**Objectif : Explorer et analyser les données en interrogeant l’API.**  
+```bash
+cd api
+python -m venv .venv
+.venv\Scripts\activate          # Windows ; source .venv/bin/activate sous Linux ou macOS
+pip install -r requirements.txt
+uvicorn main:app --reload        # puis http://127.0.0.1:8000/docs
+```
 
-🔹 **Analyse Exploratoire des Données (EDA)** :  
-- Utiliser le **SDK Python** pour requêter l’API et récupérer les données.  
-- Identifier les tendances dans les notes des films.  
-- Étudier les genres les plus populaires et les préférences des utilisateurs.  
+Ou avec Docker : `docker build -t movie-api api && docker run -p 8000:80 movie-api`.
 
-🔹 **Construction d’une Data App avec Streamlit** :  
-- Créer une **application interactive** qui permet de visualiser les tendances du cinéma.  
-- Intégrer des **tableaux dynamiques** et des **graphiques interactifs**.  
-- Offrir une **recherche avancée** des films en fonction des notes et des genres.  
+## Limites
 
-**Livrables** :  
-- Un notebook d'analyse exploratoire interactif.  
-- Une **application web Streamlit** connectée à l’API qui présente, de manière interactive, les insights aux parties prenantes.
+- L'API est en lecture seule et sans authentification : elle sert un jeu de données public.
+- La base SQLite est embarquée dans l'image. C'est simple à déployer, mais ce n'est pas fait pour des écritures concurrentes.
+- Les fichiers `api/test_*.py` et `sdk/test_sdk.py` sont des scripts de vérification manuelle, pas une suite de tests automatisés. [À compléter : tests `pytest` avec le client de test FastAPI]
+- Le SDK demande Python 3.13 ou plus récent. Les options de nouvelle tentative (`backoff`) de `MovieConfig` sont déclarées mais pas encore appliquées par le client.
+- L'hébergement gratuit met l'API en veille après inactivité.
 
----
-# Phase 1 : Développeur Python & Architecte API
+## Documentation détaillée
 
-# Conclusion – Phase 1 : Développeur Python & Architecte API
+- [`Rapport.md`](Rapport.md) : journal de construction, étape par étape.
+- [`api/README.md`](api/README.md) et [`sdk/README.md`](sdk/README.md) : détails de l'API et du SDK.
+- [`docs/notes_de_travail.md`](docs/notes_de_travail.md) : notes de cadrage du projet (ancienne version de ce README).
 
- Achever avec succès la **Phase 1** du parcours vers la maîtrise du développement backend en Python, avec un focus sur l’architecture d’API modernes. Cette étape  m'a permis de poser des fondations solides en conception de bases de données, en programmation orientée objet avec SQLAlchemy, en création d’API avec FastAPI, et en publication de SDK sur PyPI.
+## Données et licence
 
----
+Données : [MovieLens `ml-latest-small`](https://grouplens.org/datasets/movielens/) (GroupLens, université du Minnesota), redistribuées dans les conditions de leur licence (voir `data/README.txt`).
 
-## Conçu la base de l'application de A à Z
-
--  **Conception de la base de données relationnelle** : j'ai conçu des tables et des relations métier (films, évaluations, tags...) en utilisant SQLite.
--  **Importation de données réelles** depuis des fichiers CSV (MovieLens) pour alimenter les tables.
--  **Écriture de requêtes SQL** pour extraire, manipuler et explorer les données stockées.
-
----
-
-## mise en place la couche Data & ORM en Python
-
--  **Création de modèles SQLAlchemy** pour représenter les tables de la base dans le monde Python.
--  **Connexion à la base de données avec SQLAlchemy** et configuration d’une session propre pour exécuter les requêtes.
--  **Fonctions utilitaires (helpers)** permettant d’interagir efficacement avec la base de données (récupérer des films, ajouter une évaluation...).
-
----
-
-## On a développé une API robuste avec FastAPI
-
--  **Création des endpoints d’API REST** pour exposer les données via HTTP.
--  **Utilisation de Pydantic** pour définir des schémas de validation et des objets de transfert de données (DTO).
--  **Tests des routes API** avec Swagger UI et ReDoc, grâce à la documentation interactive auto-générée de FastAPI.
--  **Tests en local**, dans un conteneur **Docker**, ou **déploiement en ligne** sur **Render**.
-
----
-
-## On a produit un SDK Python pour interagir avec l’API
-
--  **Construction d’un SDK Python (`films_sdk_sbre`)** avec une interface claire pour interagir avec les endpoints exposés par l’API.
--  **Publication du SDK sur PyPI**, avec un `README.md` bien rédigé, respectant les normes de documentation.
--  **Tests du SDK publié** dans un nouveau projet, avec des appels simples en Python pour valider les fonctionnalités.
--  Le SDK est désormais accessible à toute la communauté Python, comme tout package professionnel.
-
----
-
-## Compétences clés acquises
-
--  Conception de bases de données relationnelles
--  ORM avec SQLAlchemy
--  Architecture API RESTful avec FastAPI
--  Validation et typage fort avec Pydantic
--  Utilisation de Docker pour contenairiser votre application
--  Déploiement cloud sur Render
--  Génération de documentation API automatique (Swagger / Redoc)
--  Packaging Python, publication sur PyPI, gestion de versions
--  Création d’un SDK professionnel
-
----
-
-## Et maintenant ?
-
-Dans la **Phase 2 (Data Analyst)**, on changera de perspective.
-
-On va **consommer des APIs**, extraire et analyser des données à l’aide de pandas, créer des visualisations et des tableaux de bord pour répondre à des questions métiers concrètes. Découvrir comment utiliser les données publiées par une API pour générer des **insights puissants**.
-
----
-
-  
-Jusque-là, je suis maintenant capable de **construire une API professionnelle de bout en bout et de créer un SDK réutilisable**.  
-C’est exactement ce que font les développeurs dans des équipes tech modernes !
-
-Passons à la Phase 2 : **Data Analyst – From API to Insight**.
-
---- 
+Licence du code : MIT (voir [`LICENSE`](LICENSE)).

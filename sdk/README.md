@@ -2,7 +2,7 @@
 
 Un SDK Python simple pour interagir avec l’API REST MovieLens. Il est conçu pour les **Data Analysts** et **Data Scientists**, avec une prise en charge native de **Pydantic**, **dictionnaires** et **DataFrames Pandas**.
 
-[![PyPI version](https://badge.fury.io/py/moviesdk.svg)](https://badge.fury.io/py/moviesdk)
+[![PyPI version](https://badge.fury.io/py/films-sdk-sbre.svg)](https://pypi.org/project/films-sdk-sbre/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -33,7 +33,7 @@ client = MovieClient(config=config)
 
 ```python
 client.health_check()
-# Retourne : {"status": "ok"}
+# Retourne : {"message": "API MovieLens opérationnelle"}
 ```
 
 ### 2. Récupérer un film
