@@ -65,11 +65,28 @@ uvicorn main:app --reload        # puis http://127.0.0.1:8000/docs
 
 Ou avec Docker : `docker build -t movie-api api && docker run -p 8000:80 movie-api`.
 
+## Tests
+
+31 tests `pytest` (`api/tests/`) vérifient chaque point d'accès avec le client de test de FastAPI, sur la base `movies.db` du dépôt et sans serveur : contenu des réponses, pagination, filtres, erreurs 404 et 422. Ils tournent à chaque poussée dans GitHub Actions (`.github/workflows/tests.yml`).
+
+```bash
+cd api
+pip install -r requirements.txt pytest
+pytest -q
+```
+
+En les écrivant, j'ai trouvé et corrigé deux défauts :
+
+- **une limite négative contournait le plafond de 1 000 lignes** : avec SQLite, `limit=-1` veut dire « sans limite », et `/ratings?limit=-1` renvoyait les 100 836 notes. `limit` doit maintenant valoir entre 1 et 1 000 ;
+- **huit films sans identifiant TMDb provoquaient une erreur 500** (par exemple `/links/791`), car la base stocke une chaîne vide. L'API renvoie maintenant `"tmdbId": null`.
+
+Les anciens scripts `api/test_models.py` et `api/test_query_helpers.py` sont des vérifications manuelles, exclues de `pytest` par `api/pytest.ini`.
+
 ## Limites
 
 - L'API est en lecture seule et sans authentification : elle sert un jeu de données public.
 - La base SQLite est embarquée dans l'image. C'est simple à déployer, mais ce n'est pas fait pour des écritures concurrentes.
-- Les fichiers `api/test_*.py` et `sdk/test_sdk.py` sont des scripts de vérification manuelle, pas une suite de tests automatisés. [À compléter : tests `pytest` avec le client de test FastAPI]
+- Les tests couvrent l'API, pas le SDK : `sdk/test_sdk.py` reste un script de vérification manuelle qui appelle l'API en ligne.
 - Le SDK demande Python 3.13 ou plus récent. Les options de nouvelle tentative (`backoff`) de `MovieConfig` sont déclarées mais pas encore appliquées par le client.
 - L'hébergement gratuit met l'API en veille après inactivité.
 

@@ -83,7 +83,7 @@ def read_movie(movie_id: int = Path(..., description="L'identifiant unique du fi
 )
 def list_movies(
     skip: int = Query(0, ge=0, description="Nombre de résultats à ignorer"),
-    limit: int = Query(100, le=1000, description="Nombre maximal de résultats à retourner"),
+    limit: int = Query(100, ge=1, le=1000, description="Nombre maximal de résultats à retourner"),
     title: str = Query(None, description="Filtre par titre"),
     genre: str = Query(None, description="Filtre par genre"),
     db: Session = Depends(get_db)
@@ -126,7 +126,7 @@ def read_rating(
 )
 def list_ratings(
     skip: int = Query(0, ge=0, description="Nombre de résultats à ignorer"),
-    limit: int = Query(100, le=1000, description="Nombre maximal de résultats à retourner"),
+    limit: int = Query(100, ge=1, le=1000, description="Nombre maximal de résultats à retourner"),
     movie_id: Optional[int] = Query(None, description="Filtrer par ID de film"),
     user_id: Optional[int] = Query(None, description="Filtrer par ID d'utilisateur"),
     min_rating: Optional[float] = Query(None, ge=0.0, le=5.0, description="Filtrer les notes supérieures ou égales à cette valeur"),
@@ -170,7 +170,7 @@ def read_tag(
 )
 def list_tags(
     skip: int = Query(0, ge=0, description="Nombre de résultats à ignorer"),
-    limit: int = Query(100, le=1000, description="Nombre maximal de résultats à retourner"),
+    limit: int = Query(100, ge=1, le=1000, description="Nombre maximal de résultats à retourner"),
     movie_id: Optional[int] = Query(None, description="Filtrer par ID de film"),
     user_id: Optional[int] = Query(None, description="Filtrer par ID d'utilisateur"),
     db: Session = Depends(get_db)
@@ -209,7 +209,7 @@ def read_link(
 )
 def list_links(
     skip: int = Query(0, ge=0, description="Nombre de résultats à ignorer"),
-    limit: int = Query(100, le=1000, description="Nombre maximal de résultats à retourner"),
+    limit: int = Query(100, ge=1, le=1000, description="Nombre maximal de résultats à retourner"),
     db: Session = Depends(get_db)
 ):
     return helpers.get_links(db, skip=skip, limit=limit)

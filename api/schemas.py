@@ -1,5 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List
+
+
+def _vide_vers_none(value):
+    """Quelques films n'ont pas d'identifiant TMDb : la base stocke alors une chaîne vide."""
+    return None if value == "" else value
 
 
 # --- Schémas secondaires ---
@@ -27,6 +32,8 @@ class TagBase(BaseModel):
 class LinkBase(BaseModel):
     imdbId: Optional[str]
     tmdbId: Optional[int]
+
+    _tmdb_vide = field_validator("tmdbId", mode="before")(_vide_vers_none)
 
     class Config:
         orm_mode = True
@@ -83,6 +90,8 @@ class LinkSimple(BaseModel):
     movieId: int
     imdbId: Optional[str]
     tmdbId: Optional[int]
+
+    _tmdb_vide = field_validator("tmdbId", mode="before")(_vide_vers_none)
 
     class Config:
         orm_mode = True
