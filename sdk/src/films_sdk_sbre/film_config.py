@@ -33,7 +33,6 @@ class MovieConfig:
         """
 
         self.movie_base_url = movie_base_url or os.getenv("MOVIE_API_BASE_URL")
-        print(f"MOVIE_API_BASE_URL in MovieConfig init: {self.movie_base_url}")  
 
         if not self.movie_base_url:
             raise ValueError("L'URL de base est requise. Définissez la variable d'environnement MOVIE_API_BASE_URL.")

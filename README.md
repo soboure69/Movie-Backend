@@ -67,12 +67,15 @@ Ou avec Docker : `docker build -t movie-api api && docker run -p 8000:80 movie-a
 
 ## Tests
 
-31 tests `pytest` (`api/tests/`) vérifient chaque point d'accès avec le client de test de FastAPI, sur la base `movies.db` du dépôt et sans serveur : contenu des réponses, pagination, filtres, erreurs 404 et 422. Ils tournent à chaque poussée dans GitHub Actions (`.github/workflows/tests.yml`).
+31 tests `pytest` (`api/tests/`) vérifient chaque point d'accès avec le client de test de FastAPI, sur la base `movies.db` du dépôt et sans serveur : contenu des réponses, pagination, filtres, erreurs 404 et 422.
+
+9 tests du SDK (`sdk/tests/`) vérifient les nouvelles tentatives (erreurs 5xx, 429 et réseau réessayées ; erreurs 404 non réessayées ; délai maximal respecté) et appellent l'API du dépôt de bout en bout, sans serveur.
+
+Les deux suites tournent à chaque poussée dans GitHub Actions (`.github/workflows/tests.yml`).
 
 ```bash
-cd api
-pip install -r requirements.txt pytest
-pytest -q
+cd api && pip install -r requirements.txt pytest && pytest -q
+cd ../sdk && pip install -e . && pytest -q
 ```
 
 En les écrivant, j'ai trouvé et corrigé deux défauts :
@@ -86,8 +89,7 @@ Les anciens scripts `api/test_models.py` et `api/test_query_helpers.py` sont des
 
 - L'API est en lecture seule et sans authentification : elle sert un jeu de données public.
 - La base SQLite est embarquée dans l'image. C'est simple à déployer, mais ce n'est pas fait pour des écritures concurrentes.
-- Les tests couvrent l'API, pas le SDK : `sdk/test_sdk.py` reste un script de vérification manuelle qui appelle l'API en ligne.
-- Le SDK demande Python 3.13 ou plus récent. Les options de nouvelle tentative (`backoff`) de `MovieConfig` sont déclarées mais pas encore appliquées par le client.
+- Le SDK demande Python 3.13 ou plus récent.
 - L'hébergement gratuit met l'API en veille après inactivité.
 
 ## Documentation détaillée

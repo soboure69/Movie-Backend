@@ -25,6 +25,15 @@ config = MovieConfig(movie_base_url="https://movie-backend-x8iq.onrender.com")
 client = MovieClient(config=config)
 ```
 
+### Nouvelles tentatives
+
+Depuis la version 0.0.3, le client réessaie automatiquement, avec un délai croissant, les erreurs réseau, les erreurs 5xx (par exemple pendant le réveil de l'API hébergée) et les erreurs 429. Les erreurs du client (404, 422…) ne sont pas réessayées.
+
+```python
+MovieConfig(movie_base_url=..., backoff=True, backoff_max_time=30)   # valeurs par défaut
+MovieConfig(movie_base_url=..., backoff=False)                        # une seule tentative
+```
+
 ---
 
 ## Tester le SDK

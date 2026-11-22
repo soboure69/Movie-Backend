@@ -4,18 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "films_sdk_sbre"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
-  { name="[BELLO Soboure]" },
+  { name="Soboure BELLO" },
 ]
 description = "SDK Python pour accéder à l’API MovieLens (Data Analysts/Data Scientists friendly)"
 readme = "README.md"
-license = { file="LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -26,3 +26,9 @@ dependencies = [
        'pandas>=2.2.3',
        'python-dotenv',
 ]
+
+[project.urls]
+Homepage = "https://github.com/soboure69/Movie-Backend"
+Repository = "https://github.com/soboure69/Movie-Backend"
+Documentation = "https://github.com/soboure69/Movie-Backend/tree/main/sdk"
+"API en ligne" = "https://movie-backend-x8iq.onrender.com/docs"

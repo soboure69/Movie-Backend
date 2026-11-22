@@ -33,13 +33,13 @@ jobs:
 
       - name: Build release distributions
         run: |
-          python -m build
+          python -m build sdk
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
-          path: dist/
+          path: sdk/dist/
 
   pypi-publish:
     runs-on: windows-latest
@@ -63,3 +63,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          

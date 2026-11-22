@@ -1,4 +1,4 @@
-# Lance les tests de l'API à chaque poussée et à chaque pull request.
+# Lance les tests de l'API et du SDK à chaque poussée et à chaque pull request.
 name: Tests de l'API
 
 on:
@@ -12,15 +12,17 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
       - name: Installer les dépendances
-        run: pip install -r requirements.txt pytest
-      - name: Lancer les tests
+        run: pip install -r api/requirements.txt pytest -e sdk
+      - name: Tests de l'API
+        working-directory: api
         run: pytest -q
+      - name: Tests du SDK
+        working-directory: sdk
+        run: pytest -q
+        
